@@ -3,26 +3,39 @@ provider "aws" {
 }
 
 module "vpc" {
-  source     = "./modules/vpc"
-  cidr_block = "10.0.0.0/16"
+  source = "./modules/vpc"
+
+  cidr_block         = "10.0.0.0/16"
+  public_subnet_cidr = "10.0.1.0/24"
+  availability_zone  = "ap-south-1a"
 }
 
 module "ec2" {
-  source        = "./modules/ec2-instances"
-  ami           = "ami-02ddb77f8f93ca4ca"       # Amazon Linux 2023 in ap-south-1
+  source = "./modules/ec2-instances"
+
+  vpc_id        = module.vpc.vpc_id
+  subnet_id     = module.vpc.public_subnet_id
   instance_type = "t3.micro"
-  subnet_id     = module.vpc.public_subnet_id  # public_subnet_id is a output of VPC module output.tf. Output of VPC module is the input here
 }
 
 module "s3" {
-  source      = "./modules/s3-bucket"
-  bucket_name = "my-demo-bucket-bkt-test-1"     # Change to a unique bucket name
+  source = "./modules/s3-bucket"
+
+  bucket_name = "replace-with-your-unique-s3-bucket-name-2026"
 }
+
 output "instance_id" {
   value = module.ec2.instance_id
+}
+
+output "public_ip" {
+  value = module.ec2.public_ip
 }
 
 output "bucket_arn" {
   value = module.s3.bucket_arn
 }
 
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
